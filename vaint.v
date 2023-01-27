@@ -412,7 +412,7 @@ fn main() {
 	for mut i in formatted {
 		i = i.trim_space()
 	}
-	formatted = formatted.filter(it != "")
+	formatted = formatted.filter(it != "").filter(it.starts_with("//") == false)
 	for line_number, i  in formatted {
 		time.sleep(delay.delay * time.millisecond)
 		// code := i.replace(" ", "")

@@ -1,0 +1,5 @@
+// loop(functions, delay, loop amount)
+loop( loop(right(3) + paint() + right() + paint(), 50, 10) + down() + left(40), 0, 5)
+
+// Infinite loop (will end up hitting a wall)
+loop(right() + paint(red), 10)

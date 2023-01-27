@@ -1,0 +1,17 @@
+// Set a delay in between lines
+
+// Will happen fast
+right(2)
+paint()
+
+// Will happen in more then two seconds
+set_delay(1000)
+right(2)
+paint()
+
+set_delay(0)
+
+// Takes more then one second
+right(2)
+sleep(1000)
+paint()
