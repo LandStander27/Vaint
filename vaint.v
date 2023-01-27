@@ -354,12 +354,17 @@ fn main() {
 
 		for i in l {
 			a := parse(i, [][]string{}) !
+			mut is_cmd := false
 			for cmd in commands {
 				if cmd.name == a[0] {
 					listed_cmds << cmd
 					arguments << a[1..]
+					is_cmd = true
 					break
 				}
+			}
+			if !is_cmd {
+				return error("Invalid function '${a[0]}()'")
 			}
 		}
 		
