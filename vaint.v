@@ -143,17 +143,20 @@ fn convert(value string) !int {
 	}
 }
 
-[noreturn]
-fn handle_error(err IError, num int) {
-	println(err.msg())
-	println("Error on line: ${num+1}")
-	exit(1)
-}
-
 fn exit_handler(x os.Signal) {
 	_, y := term.get_terminal_size()
 	term.set_cursor_position(x: 0, y: y)
 	exit(0)
+}
+
+[noreturn]
+fn handle_error(err IError, num int) {
+	term.clear()
+	println(err.msg())
+	println("Error on line: ${num+1}")
+	_, y := term.get_terminal_size()
+	term.set_cursor_position(x: 0, y: y)
+	exit(1)
 }
 
 fn main() {
@@ -420,13 +423,18 @@ fn main() {
 		// if check_set_vars(code, mut vars) == false {
 		if true {
 			arguments := parse(code, vars) or { handle_error(err, line_number) }
+			mut is_cmd := false
 			for x in commands {
 				if x.name == arguments[0] {
 					x.func(arguments[1..]) or {
 						handle_error(err, line_number)
 					}
+					is_cmd = true
 					break
 				}
+			}
+			if !is_cmd {
+				handle_error(error("Invalid function '${arguments[0]}()'"), line_number)
 			}
 		}
 
