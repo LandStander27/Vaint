@@ -6,6 +6,7 @@ PaintLanguage
 *.so
 *.dylib
 *.dll
+Makefile
 
 # Ignore binary output folders
 bin/

@@ -314,7 +314,7 @@ fn main() {
 		mut listed_cmds := []Command{}
 		mut arguments := [][]string{}
 
-		mut l := []string
+		mut l := []string{}
 
 		mut nest := 0
 		mut temp := ""
