@@ -401,7 +401,7 @@ fn main() {
 
 			for {
 				for cmd in 0..listed_cmds.len {
-					listed_cmds[cmd].func(non[cmd]) !
+					listed_cmds[cmd].func(arguments[cmd]) !
 				}
 				time.sleep(de * time.millisecond)
 			}
@@ -419,7 +419,7 @@ fn main() {
 					// 	term.set_cursor_position(x: 1, y: 17)
 					// 	print("${arguments}" + " ".repeat(50))
 					// }
-					listed_cmds[cmd].func(non[cmd]) !
+					listed_cmds[cmd].func(arguments[cmd]) !
 				}
 				time.sleep(de * time.millisecond)
 			}
