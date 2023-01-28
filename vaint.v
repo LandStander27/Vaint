@@ -3,6 +3,8 @@ module main
 import os
 import term
 import time
+import rand
+import strconv
 
 struct Point {
 mut:
@@ -21,7 +23,7 @@ struct Command {
 }
 
 const (
-	current = Point{1, 1}
+	current = Point{1, 2}
 	delay = SleepDelay{0}
 )
 
@@ -128,19 +130,22 @@ fn draw(p Point, color string) {
 		"green" {
 			println(term.bg_green(" "))
 		}
+		"yellow" {
+			println(term.bg_yellow(" "))
+		}
 		else {
-
+			
 		}
 	}
 	
 }
 
 fn convert(value string) !int {
-	if value == value.int().str() {
-		return value.int()
-	} else {
-		return error("Value '$value' not integer")
+	if isnil(value) {
+		return error("Value is nil")
 	}
+	
+	return strconv.atoi(value) or { return error("Value '$value' not integer") }
 }
 
 fn exit_handler(x os.Signal) {
@@ -181,11 +186,18 @@ fn main() {
 			return
 		}
 
-		if args[0] !in ["white", "red", "green", "blue"] {
-			return error("Invalid color: ${args[0]}")
+		cols := ["white", "red", "green", "blue", "yellow", "random"]
+
+		if args[0] !in cols {
+			return error("Invalid color: ${args[0]}\nValid colors are: ${term.blue(cols.join(', '))}")
 		}
 
-		draw(current, args[0])
+		if args[0] != "random" {
+			draw(current, args[0])
+			return
+		}
+
+		draw(current, rand.element(cols.filter(it != "random")) or { return error("Randomizer error: $err") })
 		
 
 	}}
@@ -223,7 +235,9 @@ fn main() {
 	commands << Command {name: "down", func: fn (args []string) ! {
 
 		if args.len != 0 {
-			unsafe { current.y += convert(args[0]) or { return err } }
+
+			val := convert(args[0]) or { return err }
+			unsafe { current.y += val }
 			_, y := term.get_terminal_size()
 			if current.y < 0 || current.y > y {
 				return error("Hit a wall")
@@ -241,7 +255,6 @@ fn main() {
 	}}
 
 	commands << Command {name: "left", func: fn (args []string) ! {
-
 		if args.len != 0 {
 			unsafe { current.x -= convert(args[0]) or { return err } }
 			x, _ := term.get_terminal_size()
@@ -261,8 +274,8 @@ fn main() {
 	}}
 
 	commands << Command {name: "right", func: fn (args []string) ! {
-
 		if args.len != 0 {
+
 			unsafe { current.x += convert(args[0]) or { return err } }
 			x, _ := term.get_terminal_size()
 			if current.x < 0 || current.x > x {
@@ -300,6 +313,18 @@ fn main() {
 		num := convert(args[0]) !
 
 		time.sleep(num * time.millisecond)
+	}}
+
+	commands << Command {name: "exit", func: fn (args []string) ! {
+		if args.len != 0 {
+			return error("Too many arguments")
+		}
+
+		_, y := term.get_terminal_size()
+		term.set_cursor_position(x: 0, y: y)
+		exit(0)
+		
+		return error("Unable to exit")
 	}}
 
 	mut ref := &commands
@@ -367,25 +392,34 @@ fn main() {
 				return error("Invalid function '${a[0]}()'")
 			}
 		}
-		
+
+		non := arguments.clone()
+
 		if args.len == 2 {
 			
 			de := convert(args[1]) !
 
 			for {
 				for cmd in 0..listed_cmds.len {
-					listed_cmds[cmd].func(arguments[cmd]) !
+					listed_cmds[cmd].func(non[cmd]) !
 				}
 				time.sleep(de * time.millisecond)
 			}
 
 		} else if args.len == 3 {
+
 			de := convert(args[1]) !
 			amount := convert(args[2]) !
 
 			for _ in 0..amount {
+
 				for cmd in 0..listed_cmds.len {
-					listed_cmds[cmd].func(arguments[cmd]) !
+
+					// if arguments.len == 3 {
+					// 	term.set_cursor_position(x: 1, y: 17)
+					// 	print("${arguments}" + " ".repeat(50))
+					// }
+					listed_cmds[cmd].func(non[cmd]) !
 				}
 				time.sleep(de * time.millisecond)
 			}
@@ -420,27 +454,40 @@ fn main() {
 	for mut i in formatted {
 		i = i.trim_space()
 	}
-	formatted = formatted.filter(it != "").filter(it.starts_with("//") == false)
+	// formatted = formatted.filter(it != "").filter(it.starts_with("//") == false)
+	mut old := "On function: "
 	for line_number, i  in formatted {
+		if i == "" {
+			continue
+		}
+		if i.starts_with("//") {
+			continue
+		}
 		time.sleep(delay.delay * time.millisecond)
 		// code := i.replace(" ", "")
 		code := i
 		// if check_set_vars(code, mut vars) == false {
-		if true {
-			arguments := parse(code, vars) or { handle_error(err, line_number) }
-			mut is_cmd := false
-			for x in commands {
-				if x.name == arguments[0] {
-					x.func(arguments[1..]) or {
-						handle_error(err, line_number)
-					}
-					is_cmd = true
-					break
+		arguments := parse(code, vars) or { handle_error(err, line_number) }
+		mut is_cmd := false
+		for x in commands {
+			if x.name == arguments[0] {
+				term.set_cursor_position(x: 1, y: 1)
+				mut a := "On function: $x.name"
+				print(a)
+				if a.len < old.len {
+					print(" ".repeat(old.len - a.len))
+					
 				}
+				old = "On function: $x.name"
+				x.func(arguments[1..]) or {
+					handle_error(err, line_number)
+				}
+				is_cmd = true
+				break
 			}
-			if !is_cmd {
-				handle_error(error("Invalid function '${arguments[0]}()'"), line_number)
-			}
+		}
+		if !is_cmd {
+			handle_error(error("Invalid function '${arguments[0]}()'"), line_number)
 		}
 
 	}

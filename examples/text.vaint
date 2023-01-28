@@ -1,0 +1,45 @@
+// set_delay(50)
+right(5)
+down(5)
+
+// Writing T
+loop(paint(random) + right(), 25, 5)
+left(3)
+down()
+loop(paint(random) + down(), 25, 6)
+
+right(5)
+up(7)
+
+// Writing E
+
+loop(paint(random) + down(), 25, 7)
+up(7)
+
+loop(loop(paint(random) + right(1), 25, 5) + down(3) + left(5), 25, 3)
+
+right(7)
+up(9)
+
+// Writing S
+loop(paint(random) + right(), 25, 5)
+left(5)
+down()
+
+loop(paint(random) + down(), 25, 2)
+
+loop(paint(random) + right(), 25, 5)
+left()
+down()
+loop(paint(random) + down(), 25, 2)
+loop(paint(random) + left(), 25, 5)
+
+up(6)
+right(8)
+
+// Writing 2nd T
+loop(paint(random) + right(), 25, 5)
+left(3)
+down()
+loop(paint(random) + down(), 25, 6)
+exit()
