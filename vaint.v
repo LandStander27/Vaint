@@ -89,6 +89,17 @@ fn parse(cmd_not string, vars [][]string) ![]string {
 	for mut i in args {
 		i = i.trim_space()
 	}
+
+	x, y := term.get_terminal_size()
+
+	for mut i in args {
+		if i == "x" {
+			i = x.str()
+		} else if i == "y" {
+			i = (y-2).str()
+		}
+	}
+
 	return args
 }
 
@@ -222,13 +233,13 @@ fn main() {
 		if args.len != 0 {
 			unsafe { current.y -= convert(args[0]) or { return err } }
 			_, y := term.get_terminal_size()
-			if current.y < 0 || current.y > y {
+			if current.y < 1 || current.y > y {
 				return error("Hit a wall")
 			}
 		} else {
 			unsafe { current.y-- }
 			_, y := term.get_terminal_size()
-			if current.y < 0 || current.y > y {
+			if current.y < 1 || current.y > y {
 				return error("Hit a wall")
 			}
 		}
@@ -244,13 +255,13 @@ fn main() {
 			val := convert(args[0]) or { return err }
 			unsafe { current.y += val }
 			_, y := term.get_terminal_size()
-			if current.y < 0 || current.y > y {
+			if current.y < 1 || current.y > y {
 				return error("Hit a wall")
 			}
 		} else {
 			unsafe { current.y++ }
 			_, y := term.get_terminal_size()
-			if current.y < 0 || current.y > y {
+			if current.y < 1 || current.y > y {
 				return error("Hit a wall")
 			}
 		}
@@ -330,6 +341,57 @@ fn main() {
 		exit(0)
 		
 		return error("Unable to exit")
+	}}
+
+	commands << Command {name: "set", func: fn (args []string) ! {
+		help := "set(x: int, y: int)\nCan supply 'current' to not change or 'random' to randomize the x or y values"
+
+		if args.len != 2 {
+			return error("Must upply 2 arguments\n$help")
+		}
+
+		mut types := []string{cap: 2}
+		for i in args {
+			if _ := convert(i) {
+				types << "int"
+			} else {
+				types << "string"
+			}
+		}
+
+		for i in 0..types.len {
+			if types[i] == "string" {
+				if args[i] !in ["current", "random"] {
+					return error("Only valid options are 'current' and 'random'")
+				}
+			}
+		}
+		x, y := term.get_terminal_size()
+		if types[0] == "int" {
+			unsafe { current.x = convert(args[0]) or { return err } }
+		} else {
+			if args[0] == "random" {
+				unsafe { current.x = rand.int_in_range(1, x) or { return error("Randomizing error: $err") } }
+			}
+		}
+
+		if types[1] == "int" {
+			unsafe { current.y = convert(args[1]) or { return err } }
+		} else {
+			if args[1] == "random" {
+				unsafe { current.y = rand.int_in_range(2, y) or { return error("Randomizing error: $err") } }
+			}
+		}
+
+		if current.y < 1 || current.y > y {
+			return error("Hit a wall")
+		}
+		if current.x < 0 || current.x > x {
+			return error("Hit a wall")
+		}
+
+		term.set_cursor_position(x: current.x, y: current.y)
+
 	}}
 
 	mut ref := &commands

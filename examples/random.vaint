@@ -1,0 +1,1 @@
+loop(loop(set(random, current) + paint(random), 0, x) + down(), 0, y)
