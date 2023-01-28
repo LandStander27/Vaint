@@ -1,5 +1,11 @@
 // loop(functions, delay, loop amount)
 loop( loop(right(3) + paint() + right() + paint(), 50, 10) + down() + left(40), 0, 5)
 
+// loop how ever many columns there are
+left()
+loop(right() + paint(blue), 10, x)
+
 // Infinite loop (will end up hitting a wall)
+left(x)
+down()
 loop(right() + paint(red), 10)

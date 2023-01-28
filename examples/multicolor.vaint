@@ -1,9 +1,9 @@
 // Paint multipule colors
 
 paint(red)
-print(blue)
+paint(blue)
 paint(green)
 
 // These do the same thing
-print(white)
-print()
+paint(white)
+paint()
