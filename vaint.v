@@ -166,6 +166,11 @@ fn handle_error(err IError, num int) {
 
 fn main() {
 
+	$if !msvc {
+		println("Must compile with MSVC")
+		exit(1)
+	}
+
 	os.signal_opt(.int, exit_handler) or {
 		println("Unable to set exit handler")
 		exit(1)
@@ -393,7 +398,7 @@ fn main() {
 			}
 		}
 
-		non := arguments.clone()
+		// non := arguments.clone()
 
 		if args.len == 2 {
 			
